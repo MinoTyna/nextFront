@@ -22,6 +22,6 @@ jobs:
       - name: 🏗️ Construire et envoyer l'image Docker
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend # ✅ Ton dossier Next.js
+          context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/nextjs-frontend:latest
