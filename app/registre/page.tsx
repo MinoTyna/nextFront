@@ -78,9 +78,11 @@ export default function SignUpClient() {
       formData.append("Client_telephone", form.telephone);
       formData.append("Client_adresse", form.adresse);
       formData.append("password", form.password);
-      formData.append("latitude", form.latitude);
-      formData.append("longitude", form.longitude);
-      if (form.photo) formData.append("photo", form.photo);
+      formData.append("latitude", form.latitude || "");
+      formData.append("longitude", form.longitude || "");
+
+      // ⚡ le nom doit correspondre au serializer / modèle Django
+      if (form.photo) formData.append("Client_photo", form.photo);
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/client/post`,

@@ -48,6 +48,7 @@ type Produit = {
   Produit_prix?: number;
   Produit_quantite?: number;
   Produit_photo?: string;
+  Produit_photo_url?: string;
 };
 
 type Responsable = {
@@ -110,6 +111,7 @@ export default function ProduitInsertPage() {
       );
       const data = await res.json();
       setProduits(data);
+      console.log(data);
     } catch {
       toast.error("Erreur lors du chargement des produits");
     }
@@ -210,34 +212,94 @@ export default function ProduitInsertPage() {
   };
 
   // === Création nouveau produit ===
+  // const handleCreateProduit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const formData = new FormData();
+  //   formData.append("Produit_nom", nom);
+  //   formData.append("Produit_prix", prix);
+  //   if (description) formData.append("Produit_description", description);
+  //   if (stock) formData.append("Produit_quantite", stock);
+  //   if (photo) formData.append("Produit_photo", photo);
+
+  //   try {
+  //     const res = await fetch(
+  //       `${process.env.NEXT_PUBLIC_BACKEND_URL}/produit/post`,
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
+
+  //     if (!res.ok) {
+  //       const err = await res.json();
+  //       throw new Error(err.detail || "Erreur création produit");
+  //     }
+
+  //     const data = await res.json();
+  //     setProduits((prev) => [...prev, data]);
+  //     toast.success("Produit ajouté !");
+  //     setShowAddProduitModal(false);
+  //     setNom("");
+  //     Setreference("");
+  //     setPrix("");
+  //     setDescription("");
+  //     setStock("");
+  //     setPhoto(null);
+  //   } catch (err: any) {
+  //     toast.error(err.message || "Erreur réseau");
+  //   }
+  // };
+  // Convertir un fichier en Base64
+  const toBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
   const handleCreateProduit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("Produit_nom", nom);
-    formData.append("Produit_prix", prix);
-    if (description) formData.append("Produit_description", description);
-    if (stock) formData.append("Produit_quantite", stock);
-    if (photo) formData.append("Produit_photo", photo);
-
     try {
+      const formData = new FormData();
+      formData.append("Produit_nom", nom);
+      formData.append("Produit_prix", prix);
+      formData.append("Produit_description", description || "");
+      formData.append("Produit_reference", reference || "");
+      formData.append("Produit_quantite", stock || "");
+
+      if (photo) {
+        formData.append("Produit_photo", photo); // ⚡ envoyer le fichier brut
+      }
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/produit/post`,
         {
           method: "POST",
-          body: formData,
+          body: formData, // ⚡ multipart/form-data automatiquement
         }
       );
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "Erreur création produit");
+        let errorMsg = "Erreur création produit";
+        try {
+          const err = await res.json();
+          errorMsg = err.detail || errorMsg;
+        } catch {
+          const text = await res.text();
+          if (text) errorMsg = text;
+        }
+        throw new Error(errorMsg);
       }
 
       const data = await res.json();
       setProduits((prev) => [...prev, data]);
       toast.success("Produit ajouté !");
       setShowAddProduitModal(false);
+
+      // Reset du formulaire
       setNom("");
       Setreference("");
       setPrix("");

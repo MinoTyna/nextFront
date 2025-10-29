@@ -51,13 +51,8 @@ const ProduitGrid: React.FC<ProduitGridProps> = ({
             <div className="w-full h-full relative">
               {produit.Produit_photo ? (
                 <img
-                  src={
-                    produit.Produit_photo.startsWith("http")
-                      ? produit.Produit_photo
-                      : `${process.env.NEXT_PUBLIC_BACKEND_URL}${produit.Produit_photo}`
-                  }
+                  src={produit.Produit_photo_url}
                   alt={produit.Produit_nom}
-                  className="object-cover rounded-t-xl w-full h-full"
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center text-2xl">

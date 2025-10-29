@@ -189,14 +189,14 @@ export default function ClientPage() {
     formData.append("Client_nom", form.nom);
     formData.append("Client_prenom", form.prenom);
     formData.append("Client_cin", form.cin);
-    formData.append("Client_telephone", form.telephone);
+    formData.append("Client_telephone", form.telephone || "");
     formData.append("Client_telephone1", form.telephone1 || "");
     formData.append("Client_telephone2", form.telephone2 || "");
     formData.append("Client_telephone3", form.telephone3 || "");
     formData.append("Client_telephone4", form.telephone4 || "");
-    formData.append("Client_adresse", form.adresse);
-    formData.append("latitude", form.latitude || "");
-    formData.append("longitude", form.longitude || "");
+    formData.append("Client_adresse", form.adresse || "");
+    formData.append("latitude", form.latitude ? String(form.latitude) : "");
+    formData.append("longitude", form.longitude ? String(form.longitude) : "");
     if (photoFile) formData.append("Client_photo", photoFile);
 
     try {
@@ -211,7 +211,12 @@ export default function ClientPage() {
         }
       );
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        throw new Error("Réponse serveur invalide");
+      }
 
       if (res.ok) {
         // Ajouter le client dans la liste locale
@@ -219,7 +224,7 @@ export default function ClientPage() {
         setAddSuccess(true);
         toast.success("Client ajouté avec succès !");
 
-        // Réinitialiser après un petit délai
+        // Réinitialiser le formulaire après un petit délai
         setTimeout(() => {
           setAdding(false);
           setAddSuccess(false);
@@ -240,12 +245,14 @@ export default function ClientPage() {
           setPhotoFile(null);
         }, 2000);
       } else {
-        toast.error(data.error || "Erreur lors de l'ajout du client.");
+        toast.error(
+          data.detail || data.error || "Erreur lors de l'ajout du client."
+        );
         setAdding(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Erreur réseau, veuillez réessayer.");
+      toast.error(error.message || "Erreur réseau, veuillez réessayer.");
       setAdding(false);
     }
   };

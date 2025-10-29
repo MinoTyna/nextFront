@@ -13,7 +13,7 @@ export function Products() {
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Vérifier si le client est connecté (via token dans localStorage)
+  // Vérifier si le client est connecté
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
@@ -59,10 +59,8 @@ export function Products() {
 
     localStorage.setItem("cart", JSON.stringify(existingCart));
     window.dispatchEvent(new Event("cartUpdated"));
-    // toast.success(`${product.Produit_nom} ajouté au panier 🛒`);
   };
 
-  // Catégories : correspondance clé (backend) → label (frontend)
   const categoryLabels: Record<string, string> = {
     Electromenager: "Électroménager",
     MaisonCuisine: "Maison & Cuisine",
@@ -73,10 +71,8 @@ export function Products() {
     Energie: "Énergie & Solaire",
   };
 
-  // Liste des catégories affichées (on ajoute "Tous" devant)
   const categories = ["Tous", ...Object.keys(categoryLabels)];
 
-  // Filtrage des produits
   const filteredProducts =
     selectedCategory === "Tous"
       ? products
@@ -117,53 +113,53 @@ export function Products() {
           </p>
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => {
-              const imageUrl = product.Produit_photo?.startsWith("http")
-                ? product.Produit_photo
-                : `${process.env.NEXT_PUBLIC_BACKEND_URL}${product.Produit_photo}`;
-
-              return (
-                <Card
-                  key={index}
-                  className="hover:shadow-lg transition-shadow flex flex-col"
-                >
-                  <div className="aspect-square relative mt-[-24px]">
+            {filteredProducts.map((product, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-shadow flex flex-col"
+              >
+                <div className="aspect-square relative mt-[-24px]">
+                  {product.Produit_photo ? (
                     <img
-                      src={imageUrl || "/placeholder.svg"}
+                      src={product.Produit_photo_url} // ⚡ URL publique Supabase
                       alt={product.Produit_nom}
                       className="object-cover rounded-t-xl w-full h-full"
                     />
-                  </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-2xl">
+                      🛒
+                    </div>
+                  )}
+                </div>
 
-                  <CardContent className="flex-1 flex flex-col justify-between">
-                    <div className="mt-2">
-                      <div className="flex justify-between items-center">
-                        <h3 className=" font-semibold text-sm">
-                          {product.Produit_nom}
-                        </h3>
-                        <p className="text-orange-600 font-bold text-sm">
-                          {product.Produit_prix?.toLocaleString()}Ar
-                        </p>
-                      </div>
-                      <p className="text-muted-foreground mt-1">
-                        {product.Produit_description || "Détails du produit"}
+                <CardContent className="flex-1 flex flex-col justify-between">
+                  <div className="mt-2">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold text-sm">
+                        {product.Produit_nom}
+                      </h3>
+                      <p className="text-orange-600 font-bold text-sm">
+                        {product.Produit_prix?.toLocaleString()}Ar
                       </p>
                     </div>
-                    <Button
-                      className={`mt-3 w-full ${
-                        isLoggedIn
-                          ? "bg-blue-900 hover:bg-blue-950 cursor-pointer"
-                          : "bg-gray-400 cursor-not-allowed"
-                      }`}
-                      onClick={() => addToCart(product)}
-                      disabled={!isLoggedIn}
-                    >
-                      {isLoggedIn ? "Ajouter au panier" : "Connectez-vous"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    <p className="text-muted-foreground mt-1">
+                      {product.Produit_description || "Détails du produit"}
+                    </p>
+                  </div>
+                  <Button
+                    className={`mt-3 w-full ${
+                      isLoggedIn
+                        ? "bg-blue-900 hover:bg-blue-950 cursor-pointer"
+                        : "bg-gray-400 cursor-not-allowed"
+                    }`}
+                    onClick={() => addToCart(product)}
+                    disabled={!isLoggedIn}
+                  >
+                    {isLoggedIn ? "Ajouter au panier" : "Connectez-vous"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>
